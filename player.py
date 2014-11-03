@@ -27,6 +27,7 @@ def buttonPressed(event):
     global currentTrackIndex
     print(event.pin_num)
     if event.pin_num == 3:
+        display("Next >>")
         play(currentTrackIndex + 1)
 
 
@@ -36,8 +37,11 @@ def initializeLcd():
     cad.lcd.blink_off()
     cad.lcd.cursor_off()
     cad.lcd.clear()
-    cad.lcd.write("Initializing ...")
+    display("Initializing ...")
 
+def display(message):
+    cad.lcd.clear()
+    cad.lcd.write(message)
 
 def initializeMpdClient():
     client.connect("localhost", 6600)
@@ -51,6 +55,7 @@ def initializeMpdClient():
 def getPlaylist():
     radioCreateUrl = baseUrl + "radio/create?artistName=Calvin+Harris&gnUserId=" + GRACENOTE_USER_ID
     print("Loading radio tracks: " + radioCreateUrl)
+    display("Loading radio..")
     return json.loads(urllib.request.urlopen(radioCreateUrl).read().decode())
 
 
@@ -88,10 +93,7 @@ def play(trackIndex):
 
     print("Playing: " + track)
     client.play()
-    cad.lcd.clear()
-    cad.lcd.write(artist[:16])
-    cad.lcd.write("\n")
-    cad.lcd.write(title[:16])
+    display(artist[:16] + "\n" + title[:16])
 
 
 initializeButtons()
@@ -99,6 +101,7 @@ initializeLcd()
 initializeMpdClient()
 playlist = getPlaylist()
 
+display("Play >")
 play(0)
 
 try:
@@ -107,6 +110,7 @@ try:
         time.sleep(1)
 except:
     # print("Unexpected error:", sys.exc_info()[0])
+    display("Stopping ...")
     print('Stopping')
     cad.lcd.clear()
     client.stop()
